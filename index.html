@@ -431,11 +431,17 @@
             </div>
 
             <div class="progress-text">
-                <span id="currentQuestion">1</span> / <span id="totalQuestions">50</span>
+                <span id="currentQuestion">1</span> / <span id="totalQuestions">100</span>
+                <br>
+                <span style="font-size: 12px; color: #999;">📊 Seksiya: <span id="currentSection">1</span>/4</span>
             </div>
 
             <div class="progress-bar">
                 <div class="progress-fill" id="progressFill"></div>
+            </div>
+
+            <div style="text-align: center; font-size: 14px; color: #667eea; font-weight: 600; margin-bottom: 10px;">
+                💰 Balllar: <span id="totalPoints">0</span> / 200
             </div>
 
             <div id="quizContent">
@@ -448,16 +454,16 @@
             <!-- Live Statistics -->
             <div class="live-stats" id="liveStats" style="display: none;">
                 <div class="stat-box">
+                    <span class="stat-label">💰 Balllar:</span>
+                    <span class="stat-value" id="livePoints">0</span>
+                </div>
+                <div class="stat-box">
                     <span class="stat-label">✅ To'g'ri:</span>
                     <span class="stat-value" id="liveCorrect">0</span>
                 </div>
                 <div class="stat-box">
                     <span class="stat-label">❌ Xato:</span>
                     <span class="stat-value" id="liveWrong">0</span>
-                </div>
-                <div class="stat-box">
-                    <span class="stat-label">📊 Harakat:</span>
-                    <span class="stat-value" id="liveAttempt">0/50</span>
                 </div>
             </div>
         </div>
@@ -469,11 +475,11 @@
             
             <div class="stats">
                 <div class="stat-item">
-                    <div class="stat-label">To'g'ri javoblar</div>
+                    <div class="stat-label">💰 Jami Balllar</div>
                     <div class="stat-value" id="correctCount">0</div>
                 </div>
                 <div class="stat-item">
-                    <div class="stat-label">Noto'g'ri javoblar</div>
+                    <div class="stat-label">❌ Noto'g'ri</div>
                     <div class="stat-value" id="wrongCount">0</div>
                 </div>
             </div>
@@ -496,9 +502,13 @@
         let quizData = [];
         let currentQuestion = 0;
         let score = 0;
+        let totalPoints = 0;
         let selectedAnswers = [];
         let startTime = Date.now();
         let shuffledQuestions = [];
+        const QUESTIONS_PER_SECTION = 25;
+        const POINTS_PER_QUESTION = 2;
+        const TOTAL_SECTIONS = 4;
 
         // Savollari JSON fayldan yuklash
         async function loadQuizData() {
@@ -506,7 +516,7 @@
                 const response = await fetch('quiz_data.json');
                 const data = await response.json();
                 quizData = data.quizzes;
-                shuffledQuestions = shuffle([...quizData]);
+                shuffledQuestions = shuffle([...quizData]).slice(0, QUESTIONS_PER_SECTION * TOTAL_SECTIONS); // 100 questions
                 displayQuestion();
             } catch (error) {
                 document.getElementById('quizContent').innerHTML = `
@@ -592,6 +602,7 @@
             if (isCorrect) {
                 options[index].classList.add('correct');
                 score++;
+                totalPoints += POINTS_PER_QUESTION; // Add 2 points
             } else {
                 options[index].classList.add('incorrect');
             }
@@ -606,7 +617,7 @@
 
             // Show feedback message
             setTimeout(() => {
-                const feedbackMsg = isCorrect ? '✅ To\'g\'ri javob!' : '❌ Noto\'g\'ri javob!';
+                const feedbackMsg = isCorrect ? '✅ To\'g\'ri javob! (+2 ball)' : '❌ Noto\'g\'ri javob!';
                 const correctAnswer = shuffledQuestions[currentQuestion]['options'][shuffledQuestions[currentQuestion]['correct']];
                 
                 alert(`${feedbackMsg}\nTo'g'ri javob: ${correctAnswer}`);
@@ -615,9 +626,10 @@
 
         function updateLiveStats() {
             const wrong = currentQuestion + 1 - score;
+            document.getElementById('livePoints').textContent = totalPoints;
             document.getElementById('liveCorrect').textContent = score;
             document.getElementById('liveWrong').textContent = wrong;
-            document.getElementById('liveAttempt').textContent = (currentQuestion + 1) + '/50';
+            document.getElementById('totalPoints').textContent = totalPoints;
         }
 
         function stopQuiz() {
@@ -639,34 +651,39 @@
         }
 
         function showResults() {
-            const percentage = Math.round((score / shuffledQuestions.length) * 100);
+            const totalQuestions = shuffledQuestions.length;
+            const maxPoints = totalQuestions * POINTS_PER_QUESTION;
+            const percentage = Math.round((score / totalQuestions) * 100);
             const timeSpent = Math.round((Date.now() - startTime) / 1000);
-            const wrong = shuffledQuestions.length - score;
+            const wrong = totalQuestions - score;
 
             let message = '';
             let emoji = '😊';
 
             if (percentage === 100) {
-                message = 'Juda ajoyib! Siz javoblarning barchasiga to\'g\'ri javob berdingiz! 🌟';
+                message = '🏆 Juda ajoyib! Siz BARCHA savollarni to\'g\'ri oldingiz! Mukammalsiz!';
                 emoji = '🏆';
-            } else if (percentage >= 80) {
-                message = 'Zoravor natija! Siz AI bo\'yicha yaxshi bilimga egasiz! 👏';
+            } else if (percentage >= 90) {
+                message = '⭐ Deyarli mukammalsiz! Siz AI bo\'yicha ekspertsiz!';
                 emoji = '⭐';
-            } else if (percentage >= 60) {
-                message = 'Yaxshi borasiz! Yana oz o\'rganib chiqmoqchi bo\'ling. 💪';
+            } else if (percentage >= 80) {
+                message = '👏 Zoravor natija! Siz AI bo\'yicha yaxshi bilimga egasiz!';
+                emoji = '👏';
+            } else if (percentage >= 70) {
+                message = '😊 Yaxshi borasiz! Yana oz o\'rganib chiqmoqchi bo\'ling.';
                 emoji = '😊';
-            } else if (percentage >= 40) {
-                message = 'Shoshma! Mavzuni yana o\'qib chiqishga harakat qiling. 📚';
-                emoji = '😐';
+            } else if (percentage >= 50) {
+                message = '📚 Shoshma! Mavzuni yana o\'qib chiqishga harakat qiling.';
+                emoji = '📚';
             } else {
-                message = 'Ushbu mavzuni chuqur o\'rganish kerak. Harakat qiling! 💡';
-                emoji = '😢';
+                message = '💡 Ushbu mavzuni chuqur o\'rganish kerak. Harakat qiling!';
+                emoji = '💡';
             }
 
             document.querySelector('.quiz-screen').style.display = 'none';
             document.getElementById('resultsScreen').classList.add('show');
-            document.getElementById('scoreDisplay').textContent = percentage + '%';
-            document.getElementById('scoreText').textContent = `${emoji} ${Math.round(percentage * 10) / 10}% Natija`;
+            document.getElementById('scoreDisplay').textContent = totalPoints + ' / ' + maxPoints;
+            document.getElementById('scoreText').textContent = `${emoji} ${percentage}% (${totalPoints} ball)`;
             document.getElementById('correctCount').textContent = score;
             document.getElementById('wrongCount').textContent = wrong;
             document.getElementById('timeSpent').textContent = timeSpent;
@@ -677,12 +694,14 @@
         }
 
         function shareTelegram() {
-            const text = `🤖 Men AI Quiz da ${Math.round((score / shuffledQuestions.length) * 100)}% natija oldim! Siz ham sinab ko'ring: ${window.location.href}`;
+            const maxPoints = shuffledQuestions.length * POINTS_PER_QUESTION;
+            const text = `🤖 Men AI Quiz da ${totalPoints}/${maxPoints} ball oldim! Siz ham sinab ko'ring: ${window.location.href}`;
             window.open(`https://t.me/share/url?url=${window.location.href}&text=${encodeURIComponent(text)}`);
         }
 
         function shareTwitter() {
-            const text = `🤖 Men AI Quiz Test da ${Math.round((score / shuffledQuestions.length) * 100)}% natija oldim! Siz ham sinab ko'ring!`;
+            const maxPoints = shuffledQuestions.length * POINTS_PER_QUESTION;
+            const text = `🤖 Men AI Quiz Test da ${totalPoints}/${maxPoints} ball oldim! Siz ham sinab ko'ring!`;
             window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${window.location.href}`);
         }
 
