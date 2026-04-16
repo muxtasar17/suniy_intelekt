@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🤖 AI Quiz - Sun'iy Intellekt Testi</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica', 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 15px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 700px;
+            width: 100%;
+            padding: 30px;
+            animation: slideIn 0.5s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .logo {
+            font-size: 48px;
+            margin-bottom: 10px;
+        }
+
+        .header h1 {
+            color: #333;
+            font-size: 28px;
+            margin-bottom: 5px;
+        }
+
+        .header p {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #e0e0e0;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .progress-text {
+            text-align: center;
+            color: #666;
+            font-size: 12px;
+            margin-bottom: 15px;
+        }
+
+        .question-container {
+            margin-bottom: 25px;
+        }
+
+        .question-number {
+            color: #667eea;
+            font-weight: 600;
+            font-size: 13px;
+            margin-bottom: 8px;
+        }
+
+        .question-text {
+            font-size: 18px;
+            color: #333;
+            font-weight: 500;
+            margin-bottom: 20px;
+            line-height: 1.5;
+        }
+
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .option {
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: white;
+            font-size: 15px;
+            color: #333;
+        }
+
+        .option:hover {
+            border-color: #667eea;
+            background: #f8f9ff;
+            transform: translateX(5px);
+        }
+
+        .option.selected {
+            border-color: #667eea;
+            background: #667eea;
+            color: white;
+        }
+
+        .option.correct {
+            border-color: #4caf50;
+            background: #4caf50;
+            color: white;
+        }
+
+        .option.incorrect {
+            border-color: #f44336;
+            background: #f44336;
+            color: white;
+        }
+
+        .option.disabled {
+            pointer-events: none;
+        }
+
+        .buttons {
+            display: flex;
+            gap: 12px;
+            margin-top: 25px;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 14px 20px;
+            border: none;
+            border-radius: 10px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .btn-secondary {
+            background: #f0f0f0;
+            color: #333;
+        }
+
+        .btn-secondary:hover {
+            background: #e0e0e0;
+        }
+
+        .results-screen {
+            display: none;
+            text-align: center;
+        }
+
+        .results-screen.show {
+            display: block;
+            animation: slideIn 0.5s ease-out;
+        }
+
+        .score-display {
+            font-size: 64px;
+            font-weight: 700;
+            color: #667eea;
+            margin-bottom: 15px;
+        }
+
+        .score-text {
+            font-size: 18px;
+            color: #333;
+            margin-bottom: 30px;
+        }
+
+        .score-message {
+            font-size: 16px;
+            color: #666;
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+
+        .share-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .share-btn {
+            padding: 10px 20px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .telegram-btn {
+            background: #0088cc;
+            color: white;
+        }
+
+        .telegram-btn:hover {
+            background: #007bba;
+            transform: translateY(-2px);
+        }
+
+        .twitter-btn {
+            background: #1da1f2;
+            color: white;
+        }
+
+        .twitter-btn:hover {
+            background: #1a8cd8;
+            transform: translateY(-2px);
+        }
+
+        .facebook-btn {
+            background: #1877f2;
+            color: white;
+        }
+
+        .facebook-btn:hover {
+            background: #166fe5;
+            transform: translateY(-2px);
+        }
+
+        .back-btn {
+            width: 100%;
+            padding: 12px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .back-btn:hover {
+            background: #764ba2;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .stat-item {
+            background: #f8f9ff;
+            padding: 15px;
+            border-radius: 10px;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 5px;
+        }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: 700;
+            color: #667eea;
+        }
+
+        .time-display {
+            text-align: center;
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 15px;
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 20px;
+                border-radius: 15px;
+            }
+
+            .header h1 {
+                font-size: 24px;
+            }
+
+            .question-text {
+                font-size: 16px;
+            }
+
+            .option {
+                padding: 12px;
+                font-size: 14px;
+            }
+
+            .buttons {
+                flex-direction: column;
+            }
+
+            .score-display {
+                font-size: 48px;
+            }
+
+            .stats {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .emoji {
+            display: inline-block;
+            margin: 0 5px;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="quiz-screen">
+            <div class="header">
+                <div class="logo">🤖</div>
+                <h1>AI Quiz Test</h1>
+                <p>Sun'iy Intellekt bo'yicha bilimingizni tekshiring</p>
+            </div>
+
+            <div class="progress-text">
+                <span id="currentQuestion">1</span> / <span id="totalQuestions">50</span>
+            </div>
+
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+
+            <div id="quizContent">
+                <div class="loading">
+                    <div class="spinner"></div>
+                    <p>Quiz yuklanyapti...</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="results-screen" id="resultsScreen">
+            <div class="logo" style="font-size: 72px; margin-bottom: 20px;">🎉</div>
+            <div class="score-display" id="scoreDisplay">0%</div>
+            <div class="score-text" id="scoreText"></div>
+            
+            <div class="stats">
+                <div class="stat-item">
+                    <div class="stat-label">To'g'ri javoblar</div>
+                    <div class="stat-value" id="correctCount">0</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">Noto'g'ri javoblar</div>
+                    <div class="stat-value" id="wrongCount">0</div>
+                </div>
+            </div>
+
+            <div class="time-display">⏱️ Vaqt: <span id="timeSpent">0</span> soniya</div>
+
+            <div class="score-message" id="scoreMessage"></div>
+
+            <div class="share-buttons">
+                <button class="share-btn telegram-btn" onclick="shareTelegram()">📱 Telegram</button>
+                <button class="share-btn twitter-btn" onclick="shareTwitter()">𝕏 Twitter</button>
+                <button class="share-btn facebook-btn" onclick="shareFacebook()">f Facebook</button>
+            </div>
+
+            <button class="back-btn" onclick="location.reload()">🔄 Qayta Boshlash</button>
+        </div>
+    </div>
+
+    <script>
+        let quizData = [];
+        let currentQuestion = 0;
+        let score = 0;
+        let selectedAnswers = [];
+        let startTime = Date.now();
+        let shuffledQuestions = [];
+
+        // Savollari JSON fayldan yuklash
+        async function loadQuizData() {
+            try {
+                const response = await fetch('quiz_data.json');
+                const data = await response.json();
+                quizData = data.quizzes;
+                shuffledQuestions = shuffle([...quizData]);
+                displayQuestion();
+            } catch (error) {
+                document.getElementById('quizContent').innerHTML = `
+                    <div class="loading">
+                        <p style="color: #f44336;">Xatolik: Quiz ma'lumotlarini yuklashda muammo!</p>
+                    </div>
+                `;
+            }
+        }
+
+        function shuffle(array) {
+            let shuffled = [...array];
+            for (let i = shuffled.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+            }
+            return shuffled;
+        }
+
+        function displayQuestion() {
+            if (currentQuestion >= shuffledQuestions.length) {
+                showResults();
+                return;
+            }
+
+            const question = shuffledQuestions[currentQuestion];
+            const progress = ((currentQuestion + 1) / shuffledQuestions.length) * 100;
+
+            document.getElementById('progressFill').style.width = progress + '%';
+            document.getElementById('currentQuestion').textContent = currentQuestion + 1;
+            document.getElementById('totalQuestions').textContent = shuffledQuestions.length;
+
+            let html = `
+                <div class="question-container">
+                    <div class="question-number">Savol ${currentQuestion + 1}</div>
+                    <div class="question-text">${question.question}</div>
+                    <div class="options">
+            `;
+
+            const shuffledOptions = shuffle(
+                question.options.map((opt, idx) => ({
+                    text: opt,
+                    correct: idx === question.correct
+                }))
+            );
+
+            shuffledOptions.forEach((option, index) => {
+                html += `
+                    <div class="option" onclick="selectAnswer(${index}, ${option.correct})">
+                        ${option.text}
+                    </div>
+                `;
+            });
+
+            html += `
+                    </div>
+                </div>
+                <div class="buttons">
+                    <button class="btn btn-primary" onclick="nextQuestion()" id="nextBtn" disabled>
+                        Keyingi
+                    </button>
+                    <button class="btn btn-secondary" onclick="previousQuestion()">
+                        Oldingi
+                    </button>
+                </div>
+            `;
+
+            document.getElementById('quizContent').innerHTML = html;
+            window.scrollTo(0, 0);
+        }
+
+        function selectAnswer(index, isCorrect) {
+            const options = document.querySelectorAll('.option');
+            options.forEach(opt => opt.classList.remove('selected'));
+            options[index].classList.add('selected');
+
+            document.getElementById('nextBtn').disabled = false;
+
+            selectedAnswers[currentQuestion] = isCorrect;
+            if (isCorrect) {
+                score++;
+            }
+        }
+
+        function nextQuestion() {
+            currentQuestion++;
+            displayQuestion();
+        }
+
+        function previousQuestion() {
+            if (currentQuestion > 0) {
+                currentQuestion--;
+                displayQuestion();
+            }
+        }
+
+        function showResults() {
+            const percentage = Math.round((score / shuffledQuestions.length) * 100);
+            const timeSpent = Math.round((Date.now() - startTime) / 1000);
+            const wrong = shuffledQuestions.length - score;
+
+            let message = '';
+            let emoji = '😊';
+
+            if (percentage === 100) {
+                message = 'Juda ajoyib! Siz javoblarning barchasiga to\'g\'ri javob berdingiz! 🌟';
+                emoji = '🏆';
+            } else if (percentage >= 80) {
+                message = 'Zoravor natija! Siz AI bo\'yicha yaxshi bilimga egasiz! 👏';
+                emoji = '⭐';
+            } else if (percentage >= 60) {
+                message = 'Yaxshi borasiz! Yana oz o\'rganib chiqmoqchi bo\'ling. 💪';
+                emoji = '😊';
+            } else if (percentage >= 40) {
+                message = 'Shoshma! Mavzuni yana o\'qib chiqishga harakat qiling. 📚';
+                emoji = '😐';
+            } else {
+                message = 'Ushbu mavzuni chuqur o\'rganish kerak. Harakat qiling! 💡';
+                emoji = '😢';
+            }
+
+            document.querySelector('.quiz-screen').style.display = 'none';
+            document.getElementById('resultsScreen').classList.add('show');
+            document.getElementById('scoreDisplay').textContent = percentage + '%';
+            document.getElementById('scoreText').textContent = `${emoji} ${Math.round(percentage * 10) / 10}% Natija`;
+            document.getElementById('correctCount').textContent = score;
+            document.getElementById('wrongCount').textContent = wrong;
+            document.getElementById('timeSpent').textContent = timeSpent;
+            document.getElementById('scoreMessage').textContent = message;
+
+            // Logo o'zgartirish
+            document.querySelector('.results-screen .logo').textContent = emoji;
+        }
+
+        function shareTelegram() {
+            const text = `🤖 Men AI Quiz da ${Math.round((score / shuffledQuestions.length) * 100)}% natija oldim! Siz ham sinab ko'ring: ${window.location.href}`;
+            window.open(`https://t.me/share/url?url=${window.location.href}&text=${encodeURIComponent(text)}`);
+        }
+
+        function shareTwitter() {
+            const text = `🤖 Men AI Quiz Test da ${Math.round((score / shuffledQuestions.length) * 100)}% natija oldim! Siz ham sinab ko'ring!`;
+            window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${window.location.href}`);
+        }
+
+        function shareFacebook() {
+            window.open(`https://www.facebook.com/sharer/sharer.php?u=${window.location.href}`);
+        }
+
+        // Quiz yuklashni boshlash
+        loadQuizData();
+    </script>
+</body>
+</html>
