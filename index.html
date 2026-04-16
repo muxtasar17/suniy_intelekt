@@ -286,6 +286,51 @@
             background: #764ba2;
         }
 
+        .live-stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: #f8f9ff;
+            border-radius: 10px;
+            border: 2px solid #667eea;
+        }
+
+        .stat-box {
+            text-align: center;
+            padding: 10px;
+            background: white;
+            border-radius: 8px;
+            border: 1px solid #e0e0e0;
+        }
+
+        .stat-label {
+            display: block;
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 5px;
+            font-weight: 600;
+        }
+
+        .stat-value {
+            display: block;
+            font-size: 20px;
+            font-weight: 700;
+            color: #667eea;
+        }
+
+        .btn-danger {
+            background: #f44336;
+            color: white;
+        }
+
+        .btn-danger:hover:not(:disabled) {
+            background: #d32f2f;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(244, 67, 54, 0.4);
+        }
+
         .stats {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -399,6 +444,22 @@
                     <p>Quiz yuklanyapti...</p>
                 </div>
             </div>
+
+            <!-- Live Statistics -->
+            <div class="live-stats" id="liveStats" style="display: none;">
+                <div class="stat-box">
+                    <span class="stat-label">✅ To'g'ri:</span>
+                    <span class="stat-value" id="liveCorrect">0</span>
+                </div>
+                <div class="stat-box">
+                    <span class="stat-label">❌ Xato:</span>
+                    <span class="stat-value" id="liveWrong">0</span>
+                </div>
+                <div class="stat-box">
+                    <span class="stat-label">📊 Harakat:</span>
+                    <span class="stat-value" id="liveAttempt">0/50</span>
+                </div>
+            </div>
         </div>
 
         <div class="results-screen" id="resultsScreen">
@@ -505,10 +566,13 @@
                 </div>
                 <div class="buttons">
                     <button class="btn btn-primary" onclick="nextQuestion()" id="nextBtn" disabled>
-                        Keyingi
+                        Keyingi →
                     </button>
                     <button class="btn btn-secondary" onclick="previousQuestion()">
-                        Oldingi
+                        ← Oldingi
+                    </button>
+                    <button class="btn btn-danger" onclick="stopQuiz()" title="Testni to'xtatish">
+                        ⏹️ To'xtat
                     </button>
                 </div>
             `;
@@ -524,9 +588,41 @@
 
             document.getElementById('nextBtn').disabled = false;
 
-            selectedAnswers[currentQuestion] = isCorrect;
+            // Real-time feedback
             if (isCorrect) {
+                options[index].classList.add('correct');
                 score++;
+            } else {
+                options[index].classList.add('incorrect');
+            }
+
+            selectedAnswers[currentQuestion] = isCorrect;
+
+            // Disable all options after selection
+            options.forEach(opt => opt.classList.add('disabled'));
+
+            // Update live statistics
+            updateLiveStats();
+
+            // Show feedback message
+            setTimeout(() => {
+                const feedbackMsg = isCorrect ? '✅ To\'g\'ri javob!' : '❌ Noto\'g\'ri javob!';
+                const correctAnswer = shuffledQuestions[currentQuestion]['options'][shuffledQuestions[currentQuestion]['correct']];
+                
+                alert(`${feedbackMsg}\nTo'g'ri javob: ${correctAnswer}`);
+            }, 300);
+        }
+
+        function updateLiveStats() {
+            const wrong = currentQuestion + 1 - score;
+            document.getElementById('liveCorrect').textContent = score;
+            document.getElementById('liveWrong').textContent = wrong;
+            document.getElementById('liveAttempt').textContent = (currentQuestion + 1) + '/50';
+        }
+
+        function stopQuiz() {
+            if (confirm('Testni to\'xtatmoqchimisiz? Natijalar saqlanadi.')) {
+                showResults();
             }
         }
 
