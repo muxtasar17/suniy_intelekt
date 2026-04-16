@@ -433,7 +433,7 @@
             <div class="progress-text">
                 <span id="currentQuestion">1</span> / <span id="totalQuestions">100</span>
                 <br>
-                <span style="font-size: 12px; color: #999;">📊 Seksiya: <span id="currentSection">1</span>/4</span>
+                <span style="font-size: 12px; color: #999;">📊 Level: <span id="currentSection">1</span>/4</span>
             </div>
 
             <div class="progress-bar">
@@ -544,14 +544,21 @@
 
             const question = shuffledQuestions[currentQuestion];
             const progress = ((currentQuestion + 1) / shuffledQuestions.length) * 100;
+            const currentLevel = Math.floor(currentQuestion / QUESTIONS_PER_SECTION) + 1;
 
             document.getElementById('progressFill').style.width = progress + '%';
             document.getElementById('currentQuestion').textContent = currentQuestion + 1;
             document.getElementById('totalQuestions').textContent = shuffledQuestions.length;
+            document.getElementById('currentSection').textContent = currentLevel;
+            document.getElementById('totalPoints').textContent = totalPoints;
+            
+            // Show live stats
+            document.getElementById('liveStats').style.display = 'grid';
+            updateLiveStats();
 
             let html = `
                 <div class="question-container">
-                    <div class="question-number">Savol ${currentQuestion + 1}</div>
+                    <div class="question-number">📝 Level ${currentLevel} | Savol ${(currentQuestion % QUESTIONS_PER_SECTION) + 1}/25 | 💰 2 ball</div>
                     <div class="question-text">${question.question}</div>
                     <div class="options">
             `;
