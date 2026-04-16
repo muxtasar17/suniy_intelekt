@@ -419,11 +419,111 @@
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
+
+        .mode-screen {
+            display: none;
+            animation: slideIn 0.5s ease-out;
+        }
+
+        .mode-screen.show {
+            display: block;
+        }
+
+        .mode-options {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-top: 30px;
+        }
+
+        .mode-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 15px;
+            padding: 30px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: white;
+            border: 3px solid transparent;
+        }
+
+        .mode-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(102, 126, 234, 0.3);
+            border-color: white;
+        }
+
+        .mode-card h2 {
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+
+        .mode-card .icon {
+            font-size: 48px;
+            margin-bottom: 15px;
+        }
+
+        .mode-card p {
+            font-size: 14px;
+            opacity: 0.9;
+            margin-bottom: 10px;
+        }
+
+        .mode-card .time {
+            font-size: 12px;
+            opacity: 0.7;
+        }
+
+        @media (max-width: 480px) {
+            .mode-options {
+                grid-template-columns: 1fr;
+            }
+
+            .mode-card {
+                padding: 20px;
+            }
+
+            .mode-card h2 {
+                font-size: 20px;
+            }
+
+            .mode-card .icon {
+                font-size: 36px;
+            }
+        }
     </style>
 </head>
 <body>
     <div class="container">
-        <div class="quiz-screen">
+        <!-- Mode Selection Screen -->
+        <div class="mode-screen show" id="modeScreen">
+            <div class="header">
+                <div class="logo">🤖</div>
+                <h1>AI Quiz Test</h1>
+                <p>Sun'iy Intellekt bo'yicha bilimingizni tekshiring</p>
+            </div>
+
+            <div style="text-align: center; margin-top: 30px; margin-bottom: 10px;">
+                <p style="color: #666; font-size: 16px; margin-bottom: 30px;">Test turini tanlang:</p>
+            </div>
+
+            <div class="mode-options">
+                <div class="mode-card" onclick="startQuiz(200)">
+                    <div class="icon">📚</div>
+                    <h2>200 savol</h2>
+                    <p>To'liq test</p>
+                    <div class="time">⏱️ Taqqoslash: ~30 daqiqa</div>
+                </div>
+                <div class="mode-card" onclick="startQuiz(25)">
+                    <div class="icon">⚡</div>
+                    <h2>25 savol</h2>
+                    <p>Tez test</p>
+                    <div class="time">⏱️ Taqqoslash: ~5 daqiqa</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="quiz-screen" style="display: none;">
             <div class="header">
                 <div class="logo">🤖</div>
                 <h1>AI Quiz Test</h1>
@@ -432,8 +532,6 @@
 
             <div class="progress-text">
                 <span id="currentQuestion">1</span> / <span id="totalQuestions">100</span>
-                <br>
-                <span style="font-size: 12px; color: #999;">📊 Level: <span id="currentSection">1</span>/4</span>
             </div>
 
             <div class="progress-bar">
@@ -506,9 +604,15 @@
         let selectedAnswers = [];
         let startTime = Date.now();
         let shuffledQuestions = [];
-        const QUESTIONS_PER_SECTION = 25;
+        let totalQuestionsSelected = 100;
         const POINTS_PER_QUESTION = 2;
-        const TOTAL_SECTIONS = 4;
+
+        function startQuiz(numQuestions) {
+            totalQuestionsSelected = numQuestions;
+            document.getElementById('modeScreen').classList.remove('show');
+            document.querySelector('.quiz-screen').style.display = 'block';
+            loadQuizData();
+        }
 
         // Savollari JSON fayldan yuklash
         async function loadQuizData() {
@@ -516,7 +620,8 @@
                 const response = await fetch('quiz_data.json');
                 const data = await response.json();
                 quizData = data.quizzes;
-                shuffledQuestions = shuffle([...quizData]).slice(0, QUESTIONS_PER_SECTION * TOTAL_SECTIONS); // 100 questions
+                shuffledQuestions = shuffle([...quizData]).slice(0, totalQuestionsSelected);
+                document.getElementById('totalQuestions').textContent = shuffledQuestions.length;
                 displayQuestion();
             } catch (error) {
                 document.getElementById('quizContent').innerHTML = `
@@ -544,12 +649,9 @@
 
             const question = shuffledQuestions[currentQuestion];
             const progress = ((currentQuestion + 1) / shuffledQuestions.length) * 100;
-            const currentLevel = Math.floor(currentQuestion / QUESTIONS_PER_SECTION) + 1;
 
             document.getElementById('progressFill').style.width = progress + '%';
             document.getElementById('currentQuestion').textContent = currentQuestion + 1;
-            document.getElementById('totalQuestions').textContent = shuffledQuestions.length;
-            document.getElementById('currentSection').textContent = currentLevel;
             document.getElementById('totalPoints').textContent = totalPoints;
             
             // Show live stats
@@ -558,7 +660,7 @@
 
             let html = `
                 <div class="question-container">
-                    <div class="question-number">📝 Level ${currentLevel} | Savol ${(currentQuestion % QUESTIONS_PER_SECTION) + 1}/25 | 💰 2 ball</div>
+                    <div class="question-number">📝 Savol ${currentQuestion + 1}/` + shuffledQuestions.length + ` | 💰 2 ball</div>
                     <div class="question-text">${question.question}</div>
                     <div class="options">
             `;
@@ -715,9 +817,6 @@
         function shareFacebook() {
             window.open(`https://www.facebook.com/sharer/sharer.php?u=${window.location.href}`);
         }
-
-        // Quiz yuklashni boshlash
-        loadQuizData();
     </script>
 </body>
 </html>
